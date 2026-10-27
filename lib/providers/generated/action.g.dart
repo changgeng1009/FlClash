@@ -40,7 +40,7 @@ final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
   }
 }
 
-String _$commonActionHash() => r'54ce5b04654db2574cc10d9e364eacb8c7137a36';
+String _$commonActionHash() => r'79b179800ef2e8988c505742274caa40f42ed948';
 
 abstract class _$CommonAction extends $Notifier<void> {
   void build();
@@ -91,7 +91,7 @@ final class SetupActionProvider extends $NotifierProvider<SetupAction, void> {
   }
 }
 
-String _$setupActionHash() => r'f7a4620c515397cff1bc10b1b944abd3b3c42150';
+String _$setupActionHash() => r'697ac529b8f19ab0c61477937a9c4c85a4f709fd';
 
 abstract class _$SetupAction extends $Notifier<void> {
   void build();
@@ -193,7 +193,7 @@ final class CoreActionProvider extends $NotifierProvider<CoreAction, void> {
   }
 }
 
-String _$coreActionHash() => r'624fd12fcd19de689078f40f102a2e745f197890';
+String _$coreActionHash() => r'6b3da2850629d781e34b68e3b840035ed11c1c1a';
 
 abstract class _$CoreAction extends $Notifier<void> {
   void build();
@@ -244,7 +244,7 @@ final class SystemActionProvider extends $NotifierProvider<SystemAction, void> {
   }
 }
 
-String _$systemActionHash() => r'6e2dafa96216791804d1570d2471ca7f65b9b3ba';
+String _$systemActionHash() => r'664eea83342ed6f2a6dd21404c70c94a56fa208b';
 
 abstract class _$SystemAction extends $Notifier<void> {
   void build();
@@ -398,7 +398,7 @@ final class ProxiesActionProvider
   }
 }
 
-String _$proxiesActionHash() => r'721af9e0ec9103345422caa33b5d73851d7d1517';
+String _$proxiesActionHash() => r'aa4a07a5bfc0412ec7a151cc48810dc65dc1f9c5';
 
 abstract class _$ProxiesAction extends $Notifier<void> {
   void build();
@@ -450,7 +450,7 @@ final class ProfilesActionProvider
   }
 }
 
-String _$profilesActionHash() => r'1ed9d382c267699f9705428fcc5f13378a7c825f';
+String _$profilesActionHash() => r'9a251b1deebcc8de4175be64a71d578da2e8ba87';
 
 abstract class _$ProfilesAction extends $Notifier<void> {
   void build();
@@ -555,7 +555,7 @@ final class ClashProvidersActionProvider
 }
 
 String _$clashProvidersActionHash() =>
-    r'eddc52e010d900fbf17a95f466e92217eb2a9987';
+    r'f0d06cb220c213d16a84f78d8eaab7c98794919b';
 
 abstract class _$ClashProvidersAction extends $Notifier<void> {
   void build();

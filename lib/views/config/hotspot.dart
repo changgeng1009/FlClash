@@ -43,7 +43,7 @@ class HotspotSharingSection extends ConsumerWidget {
     final safeMode = ref.watch(safeModeProvider);
     final ready = ref.watch(hotspotReadyProvider);
     final supported = ref.watch(hotspotSupportedProvider);
-    return generateSectionV3(
+    return generateSection(
       title: l.hotspotSharing,
       items: [
         ListItem.toggle(

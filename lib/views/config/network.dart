@@ -4,12 +4,13 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/views/config/override.dart';
+import 'package:fl_clash/views/config/tun.dart';
+import 'package:fl_clash/views/config/hotspot.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;
-
-import 'hotspot.dart';
 
 typedef _VpnUpdate<T> = VpnProps Function(VpnProps state, T value);
 
@@ -288,14 +289,6 @@ class LoopbackItem extends StatelessWidget {
 
 const _maxUint32 = 0xFFFFFFFF;
 
-// The congestion controls mipstack registers, cubic first as its default.
-const _congestionControllers = [
-  defaultCongestionController,
-  'reno',
-  'bbr',
-  'bbr3',
-];
-
 class _NumberItem extends ConsumerWidget {
   const _NumberItem({
     required this.title,
@@ -350,11 +343,9 @@ class _NumberItem extends ConsumerWidget {
   }
 }
 
-List<Widget> tunItems({
-  required bool isLinux,
-  required bool isWindows,
-  required bool isMipsStack,
-}) {
+// Android's VPN service starts from these rows; the desktop TUN takes the
+// same keys as overrides, so a profile's own values apply unless picked.
+List<Widget> tunItems({required bool isMipsStack}) {
   return [
     _NumberItem(
       title: (l) => 'MTU',
@@ -366,23 +357,13 @@ List<Widget> tunItems({
     if (isMipsStack)
       ConfigOptionsItem<String>(
         title: (l) => l.congestionController,
-        options: _congestionControllers,
+        options: congestionControllers,
         textBuilder: (value) => value,
         selector: patchClashConfigProvider.select(
           (state) => state.tun.congestionController,
         ),
         onChanged: _tunWriter(
           (state, value) => state.copyWith.tun(congestionController: value),
-        ),
-      ),
-    if (isLinux || isWindows)
-      ConfigToggleItem(
-        title: (l) => l.strictRoute,
-        selector: patchClashConfigProvider.select(
-          (state) => state.tun.strictRoute,
-        ),
-        onChanged: _tunWriter(
-          (state, value) => state.copyWith.tun(strictRoute: value),
         ),
       ),
     const BypassPrivateRouteItem(),
@@ -402,28 +383,37 @@ List<Widget> tunItems({
 }
 
 class TunSection extends ConsumerWidget {
-  const TunSection({super.key});
+  const TunSection({
+    super.key,
+    required this.isDesktop,
+    required this.isLinux,
+    required this.isWindows,
+  });
+
+  final bool isDesktop;
+  final bool isLinux;
+  final bool isWindows;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMipsStack = ref.watch(
-      patchClashConfigProvider.select(
-        (state) => state.tun.stack == TunStack.mips,
-      ),
-    );
     final appLocalizations = context.appLocalizations;
-    return generateSectionV3(
+    if (!isDesktop) {
+      final isMipsStack = ref.watch(
+        patchClashConfigProvider.select(
+          (state) => state.tun.stack == TunStack.mips,
+        ),
+      );
+      return generateSection(
+        title: appLocalizations.tun,
+        items: tunItems(isMipsStack: isMipsStack),
+        footer: appLocalizations.bypassPrivateRouteDesc,
+      );
+    }
+    return OverrideSection(
       title: appLocalizations.tun,
-      items: tunItems(
-        isLinux: system.isLinux,
-        isWindows: system.isWindows,
-        isMipsStack: isMipsStack,
-      ),
-      footer: [
-        if (system.isLinux || system.isWindows)
-          appLocalizations.strictRouteDesc,
-        appLocalizations.bypassPrivateRouteDesc,
-      ].join('\n'),
+      spec: appTunOverrideSpec(isLinux: isLinux, isWindows: isWindows),
+      items: const [BypassPrivateRouteItem(key: ValueKey(#bypassPrivateRoute))],
+      footer: [appLocalizations.bypassPrivateRouteDesc],
     );
   }
 }
@@ -494,11 +484,11 @@ class VpnSections extends ConsumerWidget {
     );
     return Column(
       children: [
-        generateSectionV3(
+        generateSection(
           items: const [VPNItem()],
           footer: appLocalizations.vpnEnableDesc,
         ),
-        generateSectionV3(
+        generateSection(
           title: 'VPN',
           items: const [
             VpnSystemProxyItem(),
@@ -525,7 +515,7 @@ class SystemProxySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return generateSectionV3(
+    return generateSection(
       title: appLocalizations.system,
       items: [
         const SystemProxyItem(),
@@ -554,7 +544,7 @@ class NetworkOptionsSection extends ConsumerWidget {
         if (isCustomInterfaceName) appLocalizations.interfaceNameDesc,
       ],
     ];
-    return generateSectionV3(
+    return generateSection(
       title: appLocalizations.options,
       items: networkOptionsItems(
         isDesktop: system.isDesktop,
@@ -572,16 +562,21 @@ class NetworkListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-      ).copyWith(top: context.contentTopPadding, bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+        top: context.sectionsTopPadding,
+        bottom: 16 + context.bottomInset,
+      ),
       children: [
         if (system.isAndroid) const VpnSections(),
         if (system.isDesktop) const SystemProxySection(),
         const NetworkOptionsSection(),
         if (system.isWindows) const HotspotSharingSection(),
-        const TunSection(),
-        generateSectionV3(
+        TunSection(
+          isDesktop: system.isDesktop,
+          isLinux: system.isLinux,
+          isWindows: system.isWindows,
+        ),
+        generateSection(
           title: context.appLocalizations.outbound,
           items: outboundItems(
             isDesktop: system.isDesktop,
