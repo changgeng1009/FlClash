@@ -9,6 +9,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;
 
+import 'hotspot.dart';
+
 typedef _VpnUpdate<T> = VpnProps Function(VpnProps state, T value);
 
 typedef _NetworkUpdate<T> = NetworkProps Function(NetworkProps state, T value);
@@ -577,6 +579,7 @@ class NetworkListView extends StatelessWidget {
         if (system.isAndroid) const VpnSections(),
         if (system.isDesktop) const SystemProxySection(),
         const NetworkOptionsSection(),
+        if (system.isWindows) const HotspotSharingSection(),
         const TunSection(),
         generateSectionV3(
           title: context.appLocalizations.outbound,
